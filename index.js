@@ -42,7 +42,7 @@ module.exports = app => {
       const slackHandle = '@' + cfg.slack_user_ids[githubUser].replace(/^@/, '')
       await axios.post(cfg.slack_channel_hook, {
         channel: slackHandle,
-        text: `Hey <${slackHandle}>, you have been assigned as a reviewer for the following PR: <${p.pull_request.url}|${p.pull_request.title}>`
+        text: `Hey <${slackHandle}>, you have been assigned as a reviewer for the following PR: <${p.pull_request.html_url}|${p.pull_request.title}>`
       })
     }
   })
