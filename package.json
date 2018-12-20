@@ -1,0 +1,52 @@
+{
+  "name": "auto-assign-issues",
+  "version": "1.0.0",
+  "description": "Auto-assign PR",
+  "author": "Radu <radu.groza@bistone.eu>",
+  "license": "ISC",
+  "repository": "https://github.com//auto-assign-issues.git",
+  "homepage": "https://github.com//auto-assign-issues",
+  "bugs": "https://github.com//auto-assign-issues/issues",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app"
+  ],
+  "scripts": {
+    "dev": "nodemon",
+    "start": "probot run ./index.js",
+    "lint": "standard --fix",
+    "test": "jest && standard",
+    "test:watch": "jest --watch --notify --notifyMode=change --coverage",
+    "webhook": "probot receive -e pull_request -p test/fixtures/pull_request.opened.json ./index.js"
+  },
+  "dependencies": {
+    "probot": "^7.2.0"
+  },
+  "devDependencies": {
+    "axios": "^0.18.0",
+    "jest": "^22.4.3",
+    "nock": "^10.0.0",
+    "nodemon": "^1.17.2",
+    "smee-client": "^1.0.2",
+    "standard": "^10.0.3"
+  },
+  "engines": {
+    "node": ">= 8.3.0"
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
+  "nodemonConfig": {
+    "exec": "npm start",
+    "watch": [
+      ".env",
+      "."
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
