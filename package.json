@@ -18,7 +18,8 @@
     "lint": "standard --fix",
     "test": "jest && standard",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage",
-    "webhook": "probot receive -e pull_request -p test/fixtures/pull_request.opened.json ./index.js"
+    "webhook": "probot receive -e pull_request -p test/fixtures/pull_request.opened.json ./index.js",
+    "webhook_review": "probot receive -e pull_request_review -p test/fixtures/pull_request_review.submitted.json ./index.js"
   },
   "dependencies": {
     "probot": "^7.2.0"

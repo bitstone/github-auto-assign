@@ -1,4 +1,4 @@
-const axios = require('axios')
+const sendSlackMessage = require('./util/slack')
 
 module.exports = app => {
   app.log('Yay, the app was loaded!')
@@ -38,12 +38,22 @@ module.exports = app => {
     })
 
     /* post Slack message */
-    if (cfg.slack_channel_hook && cfg.slack_user_ids && cfg.slack_user_ids[githubUser]) {
-      const slackHandle = '@' + cfg.slack_user_ids[githubUser].replace(/^@/, '')
-      await axios.post(cfg.slack_channel_hook, {
-        channel: slackHandle,
-        text: `Hey <${slackHandle}>, you have been assigned as a reviewer for the following PR: <${p.pull_request.html_url}|${p.pull_request.title}>`
-      })
+    await sendSlackMessage(cfg, githubUser, `you have been assigned as a reviewer for the following PR: <${p.pull_request.html_url}|${p.pull_request.title}>`)
+  })
+
+  app.on('pull_request_review.submitted', async context => {
+    const githubUser = context.payload.pull_request.user.login
+
+    if (!githubUser) {
+      return
     }
+
+    /* if other review type, ignore */
+    if (context.payload.review.state !== 'changes_requested') {
+      return
+    }
+
+    let cfg = await context.config('auto-assign.yml', {})
+    await sendSlackMessage(cfg, githubUser, `changes have been requested by *${context.payload.review.user.login}* on the following PR: <${context.payload.pull_request.html_url}|${context.payload.pull_request.title}>`)
   })
 }
