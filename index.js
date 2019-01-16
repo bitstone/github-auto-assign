@@ -1,4 +1,4 @@
-const sendSlackMessage = require('./util/slack')
+const slackAPI = require('./util/slack')
 
 module.exports = app => {
   app.log('Yay, the app was loaded!')
@@ -38,7 +38,7 @@ module.exports = app => {
     })
 
     /* post Slack message */
-    await sendSlackMessage(cfg, githubUser, `you have been assigned as a reviewer for the following PR: <${p.pull_request.html_url}|${p.pull_request.title}>`)
+    await slackAPI.sendMessage(cfg, githubUser, `you have been assigned as a reviewer for the following PR: <${p.pull_request.html_url}|${p.pull_request.title}>`)
   })
 
   app.on('pull_request_review.submitted', async context => {
@@ -54,6 +54,70 @@ module.exports = app => {
     }
 
     let cfg = await context.config('auto-assign.yml', {})
-    await sendSlackMessage(cfg, githubUser, `changes have been requested by *${context.payload.review.user.login}* on the following PR: <${context.payload.pull_request.html_url}|${context.payload.pull_request.title}>`)
+    await slackAPI.sendMessage(cfg, githubUser, `changes have been requested by *${context.payload.review.user.login}* on the following PR: <${context.payload.pull_request.html_url}|${context.payload.pull_request.title}>`)
+  })
+
+  /**
+   * On PR synchronize, send slack message to the user assigned to the PR
+   */
+  app.on('pull_request.synchronize', async context => {
+    const pr = context.payload.pull_request
+
+    if (!pr.assignees.length) {
+      return
+    }
+
+    let cfg = await context.config('auto-assign.yml', {})
+
+    pr.assignees.forEach(async user => {
+      await slackAPI.sendMessage(cfg, user.login, `a new update has been pushed on your assigned PR: <${pr.html_url}|${pr.title}>. Review the changes and approve them or request some more:)`)
+    })
+  })
+
+  /**
+   * Handles the following:
+   *
+   * push on master branch => automatically tries to merge into release branch
+   * push on release branch => automatically tries to merge into dev branch
+   *
+   */
+  app.on('push', async context => {
+    const {owner, repo} = context.repo({path: '.github/auto-assign.yml'}) // this should fail if there is no config file there
+    const cfg = await context.config('auto-assign.yml', {})
+
+    switch (context.payload) {
+      case 'refs/heads/release':
+        try {
+          await context.github.repos.merge({
+            owner,
+            repo,
+            base: 'dev',
+            head: 'release',
+            commit_message: '#ignore Automatic merge into dev. Event: push on release branch'
+          })
+        } catch (e) {
+          if (e.message !== 'Base does not exist') {
+            slackAPI.sendMergeFailedMessage(cfg, repo, context.payload, e, 'dev', 'release')
+          }
+        }
+        break
+      case 'refs/heads/master':
+        try {
+          await context.github.repos.merge({
+            owner,
+            repo,
+            base: 'release',
+            head: 'master',
+            commit_message: '#ignore Automatic merge into release. Event: push on master branch'
+          })
+        } catch (e) {
+          if (e.message !== 'Base does not exist') {
+            slackAPI.sendMergeFailedMessage(cfg, repo, context.payload, e, 'release', 'master')
+          }
+        }
+        break
+      default:
+        break
+    }
   })
 }
