@@ -85,7 +85,7 @@ module.exports = app => {
     const {owner, repo} = context.repo({path: '.github/auto-assign.yml'}) // this should fail if there is no config file there
     const cfg = await context.config('auto-assign.yml', {})
 
-    switch (context.payload) {
+    switch (context.payload.ref) {
       case 'refs/heads/release':
         try {
           await context.github.repos.merge({
