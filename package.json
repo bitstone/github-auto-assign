@@ -19,6 +19,7 @@
     "test": "jest && standard",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage",
     "webhook": "probot receive -e pull_request -p test/fixtures/pull_request.opened.json ./index.js",
+    "webhook_pr_assigned": "probot receive -e pull_request -p test/fixtures/pull_request.assigned.json ./index.js",
     "webhook_review": "probot receive -e pull_request_review -p test/fixtures/pull_request_review.submitted.json ./index.js",
     "webhook_push": "probot receive -e push -p test/fixtures/push.json ./index.js",
     "webhook_pull_request_synchronize": "probot receive -e pull_request -p test/fixtures/pull_request.synchronize.json ./index.js"
