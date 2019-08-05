@@ -1,5 +1,3 @@
-# This is currently not used anymore 
-
 # Probot: Auto Assign Pull Requests
 
 > A GitHub App that adds assignees to newly created pull requests.
