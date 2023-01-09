@@ -25,7 +25,7 @@
     "webhook_pull_request_synchronize": "probot receive -e pull_request -p test/fixtures/pull_request.synchronize.json ./index.js"
   },
   "dependencies": {
-    "probot": "^7.2.0"
+    "probot": "^12.2.8"
   },
   "devDependencies": {
     "axios": "^0.18.0",
